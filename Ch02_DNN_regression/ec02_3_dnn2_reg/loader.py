@@ -3,6 +3,7 @@ import csv
 from numpy import asarray, reshape
 
 
+
 def load_data_1d(filename):
     """Load 1D data."""
     with open(filename) as file:
