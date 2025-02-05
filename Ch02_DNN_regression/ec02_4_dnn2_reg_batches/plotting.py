@@ -70,12 +70,13 @@ def plot_mse(mse, smooth=11):
     ax[0].set_xlabel("epoch", fontsize=24)
     ax[0].set_ylabel("MSE", fontsize=24)
     ax[0].tick_params(axis="both", which="major", labelsize=16)
-
+    ax[0].grid(True)
+    
     ax[1].loglog(mse, c="tab:orange")
     ax[1].loglog(range(smooth // 2, len(mse) - smooth // 2), mse_smooth, "k--")
     ax[1].set_xlabel("epoch", fontsize=24)
     ax[1].set_ylabel("MSE", fontsize=24)
     ax[1].tick_params(axis="both", which="major", labelsize=16)
-
+    ax[1].grid(True)
     plt.tight_layout()
     plt.show()

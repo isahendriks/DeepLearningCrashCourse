@@ -3,7 +3,7 @@
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
-from numpy.random import default_rng
+from numpy.random import default_rng, permutation
 from loader import *
 from plotting import *
 
@@ -38,24 +38,28 @@ wa = rng.standard_normal(size=(2, num_neurons))  # Input weights layer 1.
 wb = rng.standard_normal(size=(num_neurons, 1))  # Input weights layer 2.
 y_p = dnn2_reg(wa, wb, x)
 
-plot_pred_2d(x, y_gt, y_p=dnn2_reg(wa, wb, x))
+#plot_pred_2d(x, y_gt, y_p=dnn2_reg(wa, wb, x))
 
-#%% Implement backpropagation
+# %% Implement backpropagation batches
 num_epochs = 10 ** 4
 num_samples = len(x)
 eta = 0.1 # learning rate
-num_batches = 10
+num_batches = num_samples/25
 batch_size = int(num_samples/num_batches)
 mse_train = np.zeros((num_epochs,))
 
 for epoch in range(num_epochs):
+    permuted_order_samples = permutation(num_samples)
+    x_permuted = x[permuted_order_samples]
+    y_gt_permuted = y_gt[permuted_order_samples]
+
     for batch_start in range(0, num_samples, batch_size):
         dwa = np.zeros(wa.shape)
         dwb = np.zeros(wb.shape)
 
         for selected in range(batch_start, batch_start + batch_size):
-            x_selected = reshape(x[selected], (1, -1))
-            y_gt_selected = reshape(y_gt[selected], (1, -1))
+            x_selected = reshape(x_permuted[selected], (1, -1))
+            y_gt_selected = reshape(y_gt_permuted[selected], (1, -1))
 
             # Detailed neural network calculation
             x_selected_a = x_selected  # Input layer 1.
@@ -83,5 +87,13 @@ for epoch in range(num_epochs):
 
     print(f"epoch = {epoch} MSE = {mse_train[epoch]:.2f}")
 
+plot_pred_vs_gt(y_gt, y_p=dnn2_reg(wa, wb, x))
+
+plot_mse(mse_train)
+
 # %%
 plot_pred_2d(x, y_gt, y_p=dnn2_reg(wa, wb, x))
+#%%
+plot_pred_vs_gt(y_gt, y_p=dnn2_reg(wa, wb, x))
+#%%
+plot_mse(mse_train)
