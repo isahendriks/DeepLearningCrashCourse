@@ -1,0 +1,54 @@
+#%% Import packages
+import os
+from torchvision.datasets.utils import download_url, _extract_zip
+from torchvision.datasets import ImageFolder
+from torchvision.transforms import Compose, Resize, ToTensor
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+
+#%% Define functions
+def plot_blood_smears(dataset, parasitized):
+    """Plot blood smears."""
+    fig, axs = plt.subplots(3, 6, figsize=(16, 8))
+    for ax in axs.ravel():
+        image, label = dataset[np.random.randint(0, len(dataset))]
+        ax.imshow(image)
+        ax.set_title(f"Parasitized ({label})" if label == parasitized else f"Uninfected ({label})", fontsize=16)
+    plt.tight_layout()
+    plt.show()
+
+def label_trans(label):
+    """Transform label."""
+    return torch.tensor(1 - label).float().unsqueeze(-1)
+
+
+#%% Load data
+dataset_path = os.path.join(".", "blood_smears_dataset")
+if not os.path.exists("blood_smears_dataset"):
+    url = "https://data.lhncbc.nlm.nih.gov/public/Malaria/cell_images.zip"
+    download_url(url, ".")
+    _extract_zip("cell_images.zip", dataset_path, None)
+    os.remove("cell_images.zip")
+
+base_dir = os.path.join(dataset_path, "cell_images")
+dataset = ImageFolder(base_dir)
+
+#%% Plot Data
+plot_blood_smears(dataset, parasitized=0)
+
+# %% Transform data
+image_trans = Compose([Resize((28, 28)), ToTensor()])
+
+# %% Define datasets that make transformations
+base_dir = os.path.join(dataset_path, "cell_images")
+dataset = ImageFolder(base_dir, transform=image_trans, 
+                      target_transform=label_trans)
+
+#%% Split data
+
+train, test = torch.utils.data.random_split(dataset, [0.8, 0.2])
+
+train_loader = torch.utils.data.DataLoader(train, batch_size=32, shuffle=True)
+test_loader = torch.utils.data.DataLoader(test, batch_size=256, shuffle=False)
+# %%
